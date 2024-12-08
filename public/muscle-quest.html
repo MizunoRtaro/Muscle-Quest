@@ -506,8 +506,8 @@
         <div class="header">
             <h1>Muscle Quest</h1>
             <div class="nav-buttons">
-                <button onclick="window.location.href='attendance.html'">Attendance Card</button>
-                <button onclick="window.location.href='workout-room.html'">Workout Room</button>
+                <button onclick="window.location.href='/index.html'">Attendance Card</button>
+                <button onclick="window.location.href='/workout-room.html'">Workout Room</button>
                 <button onclick="logout()">Logout</button>
             </div>
         </div>
@@ -605,7 +605,7 @@
                 
                 if (authError) throw authError;
                 if (!user) {
-                    window.location.href = 'attendance.html';
+                    window.location.href = '/index.html';
                     return;
                 }
 
@@ -668,7 +668,7 @@
             const hpPercentage = (monster.current_hp / monster.max_hp) * 100;
             document.getElementById('monsterHPBar').style.width = `${hpPercentage}%`;
 
-            // モンスター画像を表示（idle状態）
+            // モンスター画像を表示（idle態）
             updateMonsterImage(monster.name, 'idle');
 
             document.getElementById('battleMessage').textContent = 
@@ -996,7 +996,7 @@
             try {
                 const { error } = await supabaseClient.auth.signOut();
                 if (error) throw error;
-                window.location.href = 'attendance.html';
+                window.location.href = '/index.html';
             } catch (error) {
                 console.error('Logout error:', error);
                 alert('ログアウトに失敗しました');
