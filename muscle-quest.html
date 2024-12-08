@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muscle Quest</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @font-face {
+            font-family: 'PixelMplus12';
+            src: url('fonts/PixelMplus12-Regular.ttf') format('truetype');
+        }
+    </style>
+    <style>
+        body {
+            font-family: 'PixelMplus12', monospace;
+            margin: 0;
+            padding: 10px;
+            background: #000;
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        .header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            text-align: center;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .nav-buttons button {
+            background: #000044;
+            border: 4px solid #ffffff;
+            color: white;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'PixelMplus12', monospace;
+            transition: all 0.3s;
+            font-size: 1em;
+        }
+
+        .nav-buttons button:hover {
+            border-color: #ffff00;
+            background: #000088;
+        }
+
+        .user-stats {
+            background: #000044;
+            border: 4px solid #ffffff;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .monster-info {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .monster-stats {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .command-menu {
+            grid-template-columns: 1fr;
+        }
+
+        .post-form textarea {
+            font-size: 16px; /* モバイルでの自動ズームを防ぐ */
+        }
+
+        /* タブレット以上のサイズ */
+        @media (min-width: 768px) {
+            .header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .nav-buttons {
+                justify-content: flex-end;
+            }
+
+            .monster-info {
+                flex-direction: row;
+            }
+
+            .monster-stats {
+                flex-direction: row;
+                gap: 20px;
+            }
+
+            .command-menu {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* デスクトップサイズ */
+        @media (min-width: 1024px) {
+            body {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        .monster-area {
+            background: #000044;
+            border: 4px solid #ffffff;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .monster-image {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: #000044;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .monster-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .hp-bar {
+            width: 100%;
+            height: 30px;
+            background: #e74c3c;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .hp-bar-fill {
+            height: 100%;
+            background: #2ecc71;
+            transition: width 0.3s ease;
+        }
+
+        .attack-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #e74c3c;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #c0392b;
+        }
+
+        .ranking {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .ranking-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .ranking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-buttons button {
+            background: #3498db;
+        }
+
+        .nav-buttons button:hover {
+            background: #2980b9;
+        }
+
+        .game-window {
+            background: #000044;
+            border: 4px solid #ffffff;
+            padding: 20px;
+            border-radius: 0;
+            margin-bottom: 20px;
+        }
+
+        .monster-select {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .monster-card {
+            background: #000044;
+            border: 4px solid #ffffff;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .monster-name {
+            font-weight: bold;
+            color: #ffff00;
+        }
+
+        .monster-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .monster-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .monster-reward {
+            color: #00ff00;
+        }
+
+        .monster-card:hover {
+            border-color: #ffff00;
+            background: #000088;
+        }
+
+        .monster-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .battle-message {
+            background: #000044;
+            border: 4px solid #ffffff;
+            padding: 15px;
+            margin: 20px 0;
+            min-height: 60px;
+            text-align: center;
+        }
+
+        .command-menu {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .command-button {
+            background: #000044;
+            border: 4px solid #ffffff;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            font-family: 'PixelMplus12', monospace;
+        }
+
+        .command-button.return-button {
+            background: #e74c3c;
+        }
+
+        .command-button:hover {
+            border-color: #ffff00;
+        }
+
+        .monster-card.defeated {
+            opacity: 0.7;
+            background: #000022;
+            cursor: not-allowed;
+        }
+
+        .monster-card.defeated:hover {
+            border-color: #ffffff;
+            background: #000022;
+        }
+
+        .defeated-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .bulletin-board {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .post-form {
+            margin-bottom: 20px;
+        }
+
+        .post-form textarea {
+            width: 100%;
+            height: 80px;
+            background: #000044;
+            border: 4px solid #ffffff;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: 'PixelMplus12', monospace;
+            resize: vertical;
+        }
+
+        .post-form button {
+            background: #3498db;
+            padding: 10px 20px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-family: 'PixelMplus12', monospace;
+        }
+
+        .post-form button:hover {
+            background: #2980b9;
+        }
+
+        .post {
+            background: #000044;
+            border: 4px solid #ffffff;
+            padding: 15px;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .post-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .delete-button {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .delete-button:hover {
+            background: #c0392b;
+        }
+
+        /* レベルゲージのスタイル */
+        .exp-gauge {
+            width: 100%;
+            height: 8px;
+            background: #444;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .exp-gauge-fill {
+            height: 100%;
+            background: #f1c40f;
+            transition: width 0.3s ease;
+        }
+
+        .exp-text {
+            font-size: 0.8em;
+            color: #888;
+            text-align: center;
+            margin-top: 3px;
+        }
+
+        /* モンスターカードのレイアウト修正 */
+        .monster-card {
+            background: #000044;
+            border: 4px solid #ffffff;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .monster-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .monster-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+        }
+
+        .monster-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        @media (min-width: 768px) {
+            .monster-info {
+                flex-direction: row;
+                gap: 20px;
+            }
+
+            .monster-stats {
+                flex-direction: row;
+                gap: 20px;
+            }
+        }
+
+        /* 戻るボタンは赤系統の色を維持 */
+        .command-button.return-button {
+            background: #e74c3c;
+        }
+
+        .command-button.return-button:hover {
+            background: #c0392b;
+            border-color: #ffff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Muscle Quest</h1>
+            <div class="nav-buttons">
+                <button onclick="location.href='attendance.html'">Attendance Card</button>
+                <button onclick="location.href='workout-room.html'">Workout Room</button>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div class="user-stats">
+            <div class="stat">
+                <div>Name</div>
+                <div class="stat-value" id="userName">Hero</div>
+            </div>
+            <div class="stat">
+                <div>Title</div>
+                <div class="stat-value" id="userTitle">みならい ムキムキ</div>
+                <div class="exp-gauge">
+                    <div class="exp-gauge-fill" id="expGauge"></div>
+                </div>
+                <div class="exp-text" id="expText"></div>
+            </div>
+            <div class="stat">
+                <div>MP</div>
+                <div class="stat-value" id="userMP">0</div>
+            </div>
+        </div>
+
+        <div class="game-window" id="monsterSelect">
+            <h2>Select a monster to fight</h2>
+            <div class="monster-select" id="monsterList">
+                <!-- モンスターカードはここに動的に追加されます -->
+            </div>
+        </div>
+
+        <div class="monster-area" id="battleScreen">
+            <h2 id="monsterName">Monster Name</h2>
+            <div class="monster-image" id="monsterImage"></div>
+            <div class="hp-bar">
+                <div class="hp-bar-fill" id="monsterHPBar"></div>
+            </div>
+            <div id="monsterHP">HP: 1000/1000</div>
+            <div class="battle-message" id="battleMessage">
+                What will you do?
+            </div>
+            <div class="command-menu">
+                <button class="command-button" onclick="attack(10)">Attack (10 MP)</button>
+                <button class="command-button" onclick="attack(50)">Heavy Strike (50 MP)</button>
+                <button class="command-button" onclick="attack(100)">Ultimate Attack (100 MP)</button>
+                <button class="command-button return-button" onclick="returnToTop()">Return</button>
+            </div>
+        </div>
+
+        <div class="bulletin-board">
+            <h2>Bulletin Board</h2>
+            <div class="post-form">
+                <textarea id="postContent" placeholder="Share your motivation!" maxlength="200"></textarea>
+                <button onclick="createPost()">Post</button>
+            </div>
+            <div class="posts" id="postsList">
+                <!-- 投稿は JavaScript で動的に生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Supabase設定を非同期で取得
+        async function initializeSupabase() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+                
+                const supabaseClient = supabase.createClient(
+                    config.supabaseUrl,
+                    config.supabaseAnonKey
+                );
+                return supabaseClient;
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                throw error;
+            }
+        }
+
+        // 初期化関数を修正
+        async function initialize() {
+            try {
+                const supabaseClient = await initializeSupabase();
+                const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+                
+                if (authError) throw authError;
+                if (!user) {
+                    window.location.href = 'attendance.html';
+                    return;
+                }
+
+                await loadUserStats(supabaseClient);
+                await loadMonsterList(supabaseClient);
+                await loadPosts(supabaseClient);
+                setupRealtimeSubscription(supabaseClient);
+            } catch (error) {
+                console.error('Initialization error:', error);
+            }
+        }
+
+        // Update monster image
+        function updateMonsterImage(monsterName, state) {
+            const monsterImage = document.getElementById('monsterImage');
+            const img = document.createElement('img');
+            
+            // モンスター名を小文字に変換して画像パス生成
+            const formattedName = monsterName.toLowerCase();
+            img.src = `monsters/${formattedName}_${state}.png`;
+            
+            // 既存の画像を削除て新しい画像を追加
+            monsterImage.innerHTML = '';
+            monsterImage.appendChild(img);
+        }
+
+        // Monster name mapping
+        const monsterJapaneseNames = {
+            'Slime': 'Protein Slime',
+            'Dumbbellbat': 'Dumbbell Bat',
+            'Ianbull': 'Iron Bull'
+        };
+
+        // Sound effects setup
+        const hitSound = new Audio('sounds/se_hit_004.wav');
+        const levelUpSound = new Audio('sounds/jingle_original_clear_001.wav');
+
+        // Start battle
+        async function startBattle(monsterId) {
+            currentMonsterId = monsterId;
+            document.getElementById('monsterSelect').style.display = 'none';
+            document.getElementById('battleScreen').style.display = 'block';
+            
+            const { data: monster, error } = await supabaseClient
+                .from('monsters')
+                .select('*')
+                .eq('id', monsterId)
+                .single();
+
+            if (error) {
+                console.error('Error loading monster:', error);
+                return;
+            }
+
+            // モンスター情報を示
+            document.getElementById('monsterName').textContent = monsterJapaneseNames[monster.name] || monster.name;
+            document.getElementById('monsterHP').textContent = 
+                `HP: ${monster.current_hp}/${monster.max_hp}`;
+            
+            const hpPercentage = (monster.current_hp / monster.max_hp) * 100;
+            document.getElementById('monsterHPBar').style.width = `${hpPercentage}%`;
+
+            // モンスター画像を表示（idle状態）
+            updateMonsterImage(monster.name, 'idle');
+
+            document.getElementById('battleMessage').textContent = 
+                `${monsterJapaneseNames[monster.name]} appeared!`;
+        }
+
+        // モンスター攻撃
+        async function attack(mpCost) {
+            try {
+                if (!currentMonsterId) {
+                    console.error('No monster selected');
+                    return;
+                }
+
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                const { data: userStats } = await supabaseClient
+                    .from('user_stats')
+                    .select('muscle_points')
+                    .eq('user_id', user.id)
+                    .single();
+
+                // MPが足りない場合は攻撃できない
+                if (userStats.muscle_points < mpCost) {
+                    document.getElementById('battleMessage').textContent = 
+                        'Not enough MP! Gain MP from attendance!';
+                    return;
+                }
+
+                // 効果音を再生
+                hitSound.currentTime = 0;  // 音を最初から再生
+                hitSound.play().catch(e => console.log('効果音の再生に失敗:', e));
+
+                const damage = mpCost * 2;  // MPの2倍のダメージ
+
+                // 現在のモンスター情報を取得
+                const { data: currentMonster } = await supabaseClient
+                    .from('monsters')
+                    .select('*')
+                    .eq('id', currentMonsterId)
+                    .single();
+
+                // 新しいHPを計算（0未満にならないように）
+                const newHp = Math.max(0, currentMonster.current_hp - damage);
+
+                // 攻撃記録を保存
+                const { error: attackLogError } = await supabaseClient
+                    .from('monster_attacks')
+                    .insert([{
+                        user_id: user.id,
+                        monster_id: currentMonsterId,
+                        damage: damage,
+                        mp_used: mpCost
+                    }]);
+
+                if (attackLogError) throw attackLogError;
+
+                // MPを消費
+                const { error: mpError } = await supabaseClient
+                    .from('user_stats')
+                    .update({
+                        muscle_points: userStats.muscle_points - mpCost
+                    })
+                    .eq('user_id', user.id);
+
+                if (mpError) throw mpError;
+
+                // モンスターにダメージを与える
+                const { data: monster, error: damageError } = await supabaseClient
+                    .from('monsters')
+                    .update({
+                        current_hp: newHp
+                    })
+                    .eq('id', currentMonsterId)
+                    .select()
+                    .single();
+
+                if (damageError) throw damageError;
+
+                // HP表示を更新
+                document.getElementById('monsterHP').textContent = 
+                    `HP: ${monster.current_hp}/${monster.max_hp}`;
+                
+                const hpPercentage = (monster.current_hp / monster.max_hp) * 100;
+                document.getElementById('monsterHPBar').style.width = `${hpPercentage}%`;
+
+                // MP消費後にユーザー統計を更新表示
+                await loadUserStats();
+
+                document.getElementById('battleMessage').textContent = 
+                    `Dealt ${damage} damage!`;
+
+                // 攻撃アニメーション
+                updateMonsterImage(monster.name, 'attack');
+                setTimeout(() => {
+                    updateMonsterImage(monster.name, monster.current_hp <= 0 ? 'dead' : 'idle');
+                }, 500);
+
+                // モンスターのHPが0になった場合
+                if (monster.current_hp <= 0) {
+                    // 経験値とレベルの計算
+                    const expGain = monster.level * 50;  // モンスターのレベルに応じた経験値
+                    const { data: userStats } = await supabaseClient
+                        .from('user_stats')
+                        .select('exp, level, monsters_defeated')
+                        .eq('user_id', user.id)
+                        .single();
+
+                    const newExp = userStats.exp + expGain;
+                    const newLevel = calculateLevel(newExp);
+                    const newDefeated = userStats.monsters_defeated + 1;
+
+                    // レベルアップした場合は効果音を再生
+                    if (newLevel > userStats.level) {
+                        levelUpSound.currentTime = 0;
+                        levelUpSound.play().catch(e => console.log('レベルアップ効果音の再生に失敗:', e));
+                        document.getElementById('battleMessage').textContent = 
+                            `Level Up! Lv.${userStats.level} → Lv.${newLevel}`;
+                        
+                        // レベルアップメッセージを表示してから3秒後に討伐メッセージを表示
+                        setTimeout(() => {
+                            document.getElementById('battleMessage').textContent = 
+                                `Defeated ${monsterJapaneseNames[monster.name]}!\nGained ${expGain} experience!`;
+                        }, 3000);
+                    } else {
+                        document.getElementById('battleMessage').textContent = 
+                            `Defeated ${monsterJapaneseNames[monster.name]}!\nGained ${expGain} experience!`;
+                    }
+
+                    // ユーザー統計の更新
+                    const { error: updateError } = await supabaseClient
+                        .from('user_stats')
+                        .update({
+                            exp: newExp,
+                            level: newLevel,
+                            monsters_defeated: newDefeated
+                        })
+                        .eq('user_id', user.id);
+
+                    if (updateError) throw updateError;
+
+                    // 新しい称号をチェック
+                    await checkNewTitles(user.id, newExp);
+
+                    // 討伐時刻を記録
+                    const { error: defeatTimeError } = await supabaseClient
+                        .from('monsters')
+                        .update({
+                            last_defeated_at: new Date().toISOString()
+                        })
+                        .eq('id', currentMonsterId);
+
+                    if (defeatTimeError) throw defeatTimeError;
+
+                    setTimeout(() => {
+                        returnToTop();
+                    }, 3000);
+                }
+
+                await loadUserStats();
+                await updateMonsterDisplay(monster);
+            } catch (error) {
+                console.error('Attack error:', error);
+                document.getElementById('battleMessage').textContent = 
+                    'Attack failed...';
+            }
+        }
+
+        // モンスター表更新
+        function updateMonsterDisplay(monster) {
+            document.getElementById('monsterHP').textContent = 
+                `HP: ${monster.current_hp}/${monster.max_hp}`;
+            
+            const hpPercentage = (monster.current_hp / monster.max_hp) * 100;
+            document.getElementById('monsterHPBar').style.width = `${hpPercentage}%`;
+        }
+
+        // 投稿を作成
+        async function createPost() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) throw new Error('User not authenticated');
+
+                const content = document.getElementById('postContent').value.trim();
+                if (!content) return;
+
+                const { error } = await supabaseClient
+                    .from('bulletin_posts')
+                    .insert([{
+                        user_id: user.id,
+                        content: content,
+                        created_at: new Date().toISOString()
+                    }]);
+
+                if (error) throw error;
+
+                document.getElementById('postContent').value = '';
+                await loadPosts();
+            } catch (error) {
+                console.error('Error creating post:', error);
+                alert('投稿に失敗しました');
+            }
+        }
+
+        // 投稿を削除
+        async function deletePost(postId) {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) throw new Error('User not authenticated');
+
+                const { error } = await supabaseClient
+                    .from('bulletin_posts')
+                    .delete()
+                    .eq('id', postId)
+                    .eq('user_id', user.id);  // 自分の投稿のみ削除可能
+
+                if (error) throw error;
+                await loadPosts();
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                alert('削除に失敗しました');
+            }
+        }
+
+        // 投稿を読み込み
+        async function loadPosts() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                
+                // まず投稿を取得
+                const { data: posts, error } = await supabaseClient
+                    .from('bulletin_posts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                // 投稿者のユーザー情報を取得
+                const userIds = [...new Set(posts.map(post => post.user_id))];
+                const { data: userStats, error: statsError } = await supabaseClient
+                    .from('user_stats')
+                    .select('user_id, nickname')
+                    .in('user_id', userIds);
+
+                if (statsError) throw statsError;
+
+                // ユーザー情報をマップ化
+                const userMap = Object.fromEntries(
+                    userStats.map(stat => [stat.user_id, stat.nickname])
+                );
+
+                const postsList = document.getElementById('postsList');
+                postsList.innerHTML = '';
+
+                posts.forEach(post => {
+                    const postElement = document.createElement('div');
+                    postElement.className = 'post';
+                    
+                    const nickname = userMap[post.user_id] || 'Hero';
+                    const date = new Date(post.created_at).toLocaleString('ja-JP');
+                    
+                    postElement.innerHTML = `
+                        <div class="post-header">
+                            <span>${nickname} - ${date}</span>
+                            ${post.user_id === user.id ? 
+                                `<button class="delete-button" onclick="deletePost(${post.id})">削除</button>` 
+                                : ''}
+                        </div>
+                        <div class="post-content">${escapeHtml(post.content)}</div>
+                    `;
+                    
+                    postsList.appendChild(postElement);
+                });
+            } catch (error) {
+                console.error('Error loading posts:', error);
+            }
+        }
+
+        // HTML特殊文字をエスケープする関数
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // リアルタイム更新の設定
+        function setupRealtimeSubscription() {
+            const monsterChannel = supabaseClient
+                .channel('monster_updates')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'monsters'
+                    },
+                    (payload) => {
+                        if (payload.new.id === currentMonsterId) {
+                            updateMonsterDisplay(payload.new);
+                        }
+                    }
+                )
+                .subscribe();
+
+            const statsChannel = supabaseClient
+                .channel('stats_updates')
+                .on(
+                    'postgres_changes',
+                    {
+                        event: '*',
+                        schema: 'public',
+                        table: 'user_stats'
+                    },
+                    (payload) => {
+                        loadUserStats();
+                    }
+                )
+                .subscribe();
+        }
+
+        // ログアウト
+        async function logout() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                window.location.href = 'attendance.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('ログアウトに失敗しました');
+            }
+        }
+
+        // ユーザー統計の読み込み
+        async function loadUserStats() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                if (!user) throw new Error('User not authenticated');
+
+                const { data: userStats, error } = await supabaseClient
+                    .from('user_stats')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .single();
+
+                if (error) {
+                    console.error('Error loading user stats:', error);
+                    // 初期レコードが存在しない場合は作成
+                    const { error: insertError } = await supabaseClient
+                        .from('user_stats')
+                        .insert([{
+                            user_id: user.id,
+                            level: 1,
+                            exp: 0,
+                            muscle_points: 0,
+                            total_damage: 0,
+                            monsters_defeated: 0,
+                            nickname: 'Hero'
+                        }])
+                        .select()
+                        .single();
+
+                    if (insertError) throw insertError;
+                    return;
+                }
+
+                // 最新の称号を取得
+                const { data: titles, error: titlesError } = await supabaseClient
+                    .from('user_titles')
+                    .select('title')
+                    .eq('user_id', user.id)
+                    .order('acquired_at', { ascending: false })
+                    .limit(1);
+
+                const currentTitle = titles && titles.length > 0 ? titles[0].title : 'Novice Muscle';
+
+                document.getElementById('userName').textContent = userStats.nickname || 'Hero';
+                document.getElementById('userTitle').textContent = currentTitle;
+                document.getElementById('userMP').textContent = userStats.muscle_points;
+                updateExpGauge(userStats.exp, userStats.level);  // 経験値ゲージを更新
+            } catch (error) {
+                console.error('Error in loadUserStats:', error);
+            }
+        }
+
+        // モンスターリストの読み込み
+        async function loadMonsterList() {
+            await checkMonstersRevival();
+
+            const { data: monsters, error } = await supabaseClient
+                .from('monsters')
+                .select('*')
+                .order('level', { ascending: true });
+
+            if (error) {
+                console.error('Error loading monsters:', error);
+                return;
+            }
+
+            const monsterList = document.getElementById('monsterList');
+            monsterList.innerHTML = '';
+
+            monsters.forEach(monster => {
+                const monsterCard = document.createElement('div');
+                monsterCard.className = 'monster-card';
+                if (monster.current_hp <= 0) {
+                    monsterCard.classList.add('defeated');
+                    // 討伐済みの場合はクリックイベントを設定しない
+                } else {
+                    // HP残っている場合のみリックイベントを設定
+                    monsterCard.onclick = () => startBattle(monster.id);
+                    monsterCard.style.cursor = 'pointer';
+                }
+
+                monsterCard.innerHTML = `
+                    <div class="monster-info">
+                        <img src="monsters/${monster.name.toLowerCase()}_idle.png" alt="${monster.name}">
+                        <div>
+                            <div class="monster-name">${monsterJapaneseNames[monster.name] || monster.name}</div>
+                            <div class="monster-stats">
+                                <span>Lv.${monster.level}</span>
+                                <span>HP: ${monster.current_hp}/${monster.max_hp}</span>
+                            </div>
+                            ${monster.current_hp <= 0 ? `
+                                <div class="defeated-badge">Defeated</div>
+                                <div class="revival-time">Revives in ${daysRemaining} days</div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                monsterList.appendChild(monsterCard);
+            });
+        }
+
+        // モンスターの復活をチェック
+        async function checkMonstersRevival() {
+            const REVIVAL_DAYS = 7; // 復までの日数
+
+            const { data: monsters, error } = await supabaseClient
+                .from('monsters')
+                .select('*')
+                .lt('current_hp', 1)  // HPが0以下のモンスター
+                .not('last_defeated_at', 'is', null);
+
+            if (error) {
+                console.error('Error checking monsters revival:', error);
+                return;
+            }
+
+            for (const monster of monsters) {
+                const defeatDate = new Date(monster.last_defeated_at);
+                const now = new Date();
+                const daysSinceDefeat = (now - defeatDate) / (1000 * 60 * 60 * 24);
+
+                if (daysSinceDefeat >= REVIVAL_DAYS) {
+                    // モンスターを復活
+                    const { error: reviveError } = await supabaseClient
+                        .from('monsters')
+                        .update({
+                            current_hp: monster.max_hp,
+                            last_defeated_at: null
+                        })
+                        .eq('id', monster.id);
+
+                    if (reviveError) {
+                        console.error('Error reviving monster:', reviveError);
+                    }
+                }
+            }
+        }
+
+        // トップ画に戻る
+        function returnToTop() {
+            document.getElementById('monsterSelect').style.display = 'block';
+            document.getElementById('battleScreen').style.display = 'none';
+            currentMonsterId = null;
+            loadMonsterList();  // モンスターリスト再読み込み
+        }
+
+        // 復活までの残り時間を計算して表示用テキストを返す
+        function getRevivalTimeText(defeatTime) {
+            if (!defeatTime) return '';
+            const REVIVAL_DAYS = 7;
+            const defeatDate = new Date(defeatTime);
+            const now = new Date();
+            const daysSinceDefeat = (now - defeatDate) / (1000 * 60 * 60 * 24);
+            const daysRemaining = Math.ceil(REVIVAL_DAYS - daysSinceDefeat);
+            
+            return `Revives in ${daysRemaining} days`;
+        }
+
+        // 称号の定義
+        const TITLES = [
+            { exp: 0, title: 'Novice Muscle' },
+            { exp: 100, title: 'Beginner Bodybuilder' },
+            { exp: 500, title: 'Amateur Athlete' },
+            { exp: 1000, title: 'Veteran Trainer' },
+            { exp: 2000, title: 'Muscle Master' },
+            { exp: 5000, title: 'Legend of the Gym' },
+        ];
+
+        // 経験値からレベルを計算
+        function calculateLevel(exp) {
+            return Math.floor(Math.sqrt(exp) / 2) + 1;
+        }
+
+        // 新しい称号をチェック
+        async function checkNewTitles(userId, currentExp) {
+            try {
+                // 現在の称号リストを取得
+                const { data: currentTitles, error: titlesError } = await supabaseClient
+                    .from('user_titles')
+                    .select('title')
+                    .eq('user_id', userId);
+
+                if (titlesError) throw titlesError;
+
+                const userTitles = new Set(currentTitles.map(t => t.title));
+                const newTitles = [];
+
+                // 経験値に応じた称号をチェック
+                TITLES.forEach(({ exp, title }) => {
+                    if (currentExp >= exp && !userTitles.has(title)) {
+                        newTitles.push({ user_id: userId, title, acquired_at: new Date().toISOString() });
+                    }
+                });
+
+                // 新しい称号があれば追加
+                if (newTitles.length > 0) {
+                    const { error: insertError } = await supabaseClient
+                        .from('user_titles')
+                        .insert(newTitles);
+
+                    if (insertError) throw insertError;
+
+                    // 称号獲得メッセージを表示
+                    newTitles.forEach(({ title }) => {
+                        document.getElementById('battleMessage').textContent = 
+                            `New title acquired: "${title}"!`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error checking titles:', error);
+            }
+        }
+
+        // 次のレベルまでの経験値を計算
+        function calculateNextLevelExp(level) {
+            return Math.pow((level - 1) * 2, 2);
+        }
+
+        // 経験値ゲージを更新
+        function updateExpGauge(exp, level) {
+            // 現在の称号と次の称号を取得
+            let currentTitle = TITLES[0];
+            let nextTitle = TITLES[1];
+            
+            for (let i = 0; i < TITLES.length; i++) {
+                if (exp >= TITLES[i].exp) {
+                    currentTitle = TITLES[i];
+                    nextTitle = TITLES[i + 1];
+                }
+            }
+
+            // 最高称号の場合
+            if (!nextTitle) {
+                document.getElementById('expGauge').style.width = '100%';
+                document.getElementById('expText').textContent = 'Highest Title Achieved!';
+                return;
+            }
+
+            // 次の称号までの進捗を計算
+            const expNeeded = nextTitle.exp - currentTitle.exp;
+            const currentProgress = exp - currentTitle.exp;
+            const percentage = (currentProgress / expNeeded) * 100;
+
+            document.getElementById('expGauge').style.width = `${percentage}%`;
+            document.getElementById('expText').textContent = 
+                `Next title: ${currentProgress}/${expNeeded}`;
+        }
+
+        // 初期実行
+        initialize();
+    </script>
+</body>
+</html> 
