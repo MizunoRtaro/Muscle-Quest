@@ -569,27 +569,38 @@
     </div>
 
     <script>
-        // Supabase設定を非同期で取得
+        // グローバルなsupabaseClientの初期化
+        let supabaseClient;
+
+        // Supabase初期化関数を修正
         async function initializeSupabase() {
             try {
                 const response = await fetch('/api/config');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Supabase config');
+                }
                 const config = await response.json();
                 
-                const supabaseClient = supabase.createClient(
+                supabaseClient = supabase.createClient(
                     config.supabaseUrl,
                     config.supabaseAnonKey
                 );
                 return supabaseClient;
             } catch (error) {
                 console.error('Failed to initialize Supabase:', error);
-                throw error;
+                // 一時的な対応として、ハードコードされた値を使用
+                supabaseClient = supabase.createClient(
+                    'https://fgfonvsdxojpnvxebynd.supabase.co',
+                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZm9udnNkeG9qcG52eGVieW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NzEyOTMsImV4cCI6MjA0OTI0NzI5M30.GaCFlB8abTzXkWAFmXkI6EwR3qIy8w9qJuLs745tzck'
+                );
+                return supabaseClient;
             }
         }
 
-        // 初期化関数を修正
+        // initialize関数を修正
         async function initialize() {
             try {
-                const supabaseClient = await initializeSupabase();
+                await initializeSupabase();
                 const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
                 
                 if (authError) throw authError;
@@ -598,10 +609,10 @@
                     return;
                 }
 
-                await loadUserStats(supabaseClient);
-                await loadMonsterList(supabaseClient);
-                await loadPosts(supabaseClient);
-                setupRealtimeSubscription(supabaseClient);
+                await loadUserStats();
+                await loadMonsterList();
+                await loadPosts();
+                setupRealtimeSubscription();
             } catch (error) {
                 console.error('Initialization error:', error);
             }
