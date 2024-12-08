@@ -506,8 +506,8 @@
         <div class="header">
             <h1>Muscle Quest</h1>
             <div class="nav-buttons">
-                <button onclick="location.href='attendance.html'">Attendance Card</button>
-                <button onclick="location.href='workout-room.html'">Workout Room</button>
+                <button onclick="window.location.href='attendance.html'">Attendance Card</button>
+                <button onclick="window.location.href='workout-room.html'">Workout Room</button>
                 <button onclick="logout()">Logout</button>
             </div>
         </div>
@@ -933,7 +933,7 @@
                         <div class="post-header">
                             <span>${nickname} - ${date}</span>
                             ${post.user_id === user.id ? 
-                                `<button class="delete-button" onclick="deletePost(${post.id})">削除</button>` 
+                                `<button class="delete-button" onclick="deletePost(${post.id})">Delete</button>` 
                                 : ''}
                         </div>
                         <div class="post-content">${escapeHtml(post.content)}</div>
