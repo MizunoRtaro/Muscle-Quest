@@ -281,6 +281,19 @@
                 <button type="submit">Login</button>
             </form>
             <div id="loginMessage" class="message"></div>
+            <!-- iOSのホーム画面追加ガイド -->
+            <div id="addToHomeScreen" style="display: none; margin-top: 20px; text-align: center;">
+                <button onclick="showInstallGuide()" style="
+                    background: #27ae60;
+                    border: 2px solid #ffffff;
+                    color: white;
+                    padding: 10px 20px;
+                    font-family: 'PixelMplus12', monospace;
+                    cursor: pointer;
+                ">
+                    Add to Home Screen
+                </button>
+            </div>
         </div>
 
         <!-- 出席フォーム -->
@@ -362,7 +375,7 @@
             }
         }
 
-        // 設定モーダルを開く
+        // 設定モーダルを開���
         function openSettings() {
             document.getElementById('settingsModal').style.display = 'flex';
         }
@@ -637,6 +650,63 @@
             currentDate.setMonth(currentDate.getMonth() + delta);
             renderCalendar();
         }
+
+        // iOSデバイスかつスタンドアロンモードでない場合にボタンを表示
+        function checkIOSDevice() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.navigator.standalone;
+            
+            if (isIOS && !isStandalone) {
+                document.getElementById('addToHomeScreen').style.display = 'block';
+            }
+        }
+
+        // インストールガイドを表示
+        function showInstallGuide() {
+            const guideModal = document.createElement('div');
+            guideModal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+
+            guideModal.innerHTML = `
+                <div style="
+                    background: #000044;
+                    border: 4px solid #ffffff;
+                    padding: 20px;
+                    max-width: 80%;
+                    text-align: center;
+                    color: white;
+                ">
+                    <h3>How to Add to Home Screen</h3>
+                    <p>1. Tap the Share button <span style="font-size: 1.2em">⎋</span></p>
+                    <p>2. Scroll down and tap "Add to Home Screen"</p>
+                    <p>3. Tap "Add" to complete</p>
+                    <button onclick="this.parentElement.parentElement.remove()" style="
+                        background: #e74c3c;
+                        border: none;
+                        color: white;
+                        padding: 10px 20px;
+                        margin-top: 10px;
+                        cursor: pointer;
+                        font-family: 'PixelMplus12', monospace;
+                    ">Close</button>
+                </div>
+            `;
+
+            document.body.appendChild(guideModal);
+        }
+
+        // ページ読み込み時にチェック
+        window.addEventListener('DOMContentLoaded', checkIOSDevice);
 
         // ページ読み込み時に初期化を実行
         window.addEventListener('DOMContentLoaded', initializeApp);
