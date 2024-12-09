@@ -58,3 +58,5 @@ Author: R Taro (X:@masukusoro) Japanese
 
 1. Create a Supabase project
 2. Set environment variables
+
+R creative Lab

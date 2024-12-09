@@ -507,7 +507,7 @@
             <h1>Muscle Quest</h1>
             <div class="nav-buttons">
                 <button onclick="window.location.href='/index.html'">Attendance Card</button>
-                <button onclick="window.location.href='/workout-room.html'">Workout Room</button>
+                <button onclick="window.location.href='https://rpersonal-aigym.vercel.app/'">Workout Room</button>
                 <button onclick="logout()">Logout</button>
             </div>
         </div>
@@ -569,7 +569,7 @@
     </div>
 
     <script>
-        // グローバルなsupabaseClientの初期化
+        // グローバルなsupabaseClient��初期化
         let supabaseClient;
 
         // Supabase初期化関数を修正
@@ -668,7 +668,7 @@
             const hpPercentage = (monster.current_hp / monster.max_hp) * 100;
             document.getElementById('monsterHPBar').style.width = `${hpPercentage}%`;
 
-            // モンスター画像を表示（idle態）
+            // モンスター画像を表��（idle態）
             updateMonsterImage(monster.name, 'idle');
 
             document.getElementById('battleMessage').textContent = 
@@ -768,7 +768,7 @@
 
                 // モンスターのHPが0になった場合
                 if (monster.current_hp <= 0) {
-                    // 経験値とレベルの計算
+                    // 経験値とレベルの��算
                     const expGain = monster.level * 50;  // モンスターのレベルに応じた経験値
                     const { data: userStats } = await supabaseClient
                         .from('user_stats')
