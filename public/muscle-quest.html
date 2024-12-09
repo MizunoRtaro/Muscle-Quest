@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Muscle Quest</title>
+    <link rel="apple-touch-icon" href="icons/icon-180x180.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Muscle Quest">
+    <link rel="manifest" href="manifest.json">
+    <meta property="og:title" content="Muscle Quest - 筋トレ習慣化RPG">
+    <meta property="og:description" content="筋トレを楽しく継続！モンスターと戦って、仲間と一緒に成長しよう！">
+    <meta property="og:image" content="https://muscle-quest.vercel.app/ogp-image.png">
+    <meta property="og:url" content="https://muscle-quest.vercel.app">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @font-face {
@@ -801,7 +812,7 @@
                         document.getElementById('battleMessage').textContent = 
                             `Level Up! Lv.${userStats.level} → Lv.${newLevel}`;
                         
-                        // レベルアップメッセージを表示してから3秒後��討伐メッセージを表示
+                        // レベルアップメッセージを表示してから3秒後討伐メッセージを表示
                         setTimeout(() => {
                             document.getElementById('battleMessage').textContent = 
                                 `Defeated ${monsterJapaneseNames[monster.name]}!\nGained ${expGain} experience!`;
@@ -826,7 +837,7 @@
                     // 新しい称号をチェック
                     await checkNewTitles(user.id, newExp);
 
-                    // 討伐時刻を記録
+                    // 討伐時��を記録
                     const { error: defeatTimeError } = await supabaseClient
                         .from('monsters')
                         .update({
@@ -928,7 +939,7 @@
 
                 if (statsError) throw statsError;
 
-                // ユーザー情報をマップ化
+                // ユーザー情���をマップ化
                 const userMap = Object.fromEntries(
                     userStats.map(stat => [stat.user_id, stat.nickname])
                 );
@@ -1063,13 +1074,13 @@
                 document.getElementById('userName').textContent = userStats.nickname || 'Hero';
                 document.getElementById('userTitle').textContent = currentTitle;
                 document.getElementById('userMP').textContent = userStats.muscle_points;
-                updateExpGauge(userStats.exp, userStats.level);  // 経験値ゲージを更新
+                updateExpGauge(userStats.exp, userStats.level);  // 経験値���ージを更新
             } catch (error) {
                 console.error('Error in loadUserStats:', error);
             }
         }
 
-        // モンスターリ���トの読み込み
+        // モンスターリストの読み込み
         async function loadMonsterList() {
             await checkMonstersRevival();
 
@@ -1221,7 +1232,7 @@
                     }
                 });
 
-                // 新しい称号があれ��追加
+                // 新しい称号があれば追加
                 if (newTitles.length > 0) {
                     const { error: insertError } = await supabaseClient
                         .from('user_titles')
@@ -1258,7 +1269,7 @@
                 }
             }
 
-            // 最高称号��場合
+            // 最高称号の場合
             if (!nextTitle) {
                 document.getElementById('expGauge').style.width = '100%';
                 document.getElementById('expText').textContent = 'Highest Title Achieved!';
