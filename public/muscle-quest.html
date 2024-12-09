@@ -25,6 +25,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 10px;
+            padding-bottom: 30px;
         }
 
         .header {
@@ -88,7 +89,16 @@
         }
 
         .post-form textarea {
-            font-size: 16px; /* モバイルでの自動ズームを防ぐ */
+            width: 100%;
+            height: 80px;
+            background: #000044;
+            border: 2px solid #ffffff;
+            color: white;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: 'PixelMplus12', monospace;
+            resize: vertical;
+            box-sizing: border-box;
         }
 
         /* タブレット以上のサイズ */
@@ -353,8 +363,11 @@
         .bulletin-board {
             background: rgba(255, 255, 255, 0.1);
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 0;
             margin-top: 20px;
+            margin-bottom: 20px;
+            background: #000044;
+            border: 4px solid #ffffff;
         }
 
         .post-form {
@@ -388,10 +401,11 @@
 
         .post {
             background: #000044;
-            border: 4px solid #ffffff;
+            border: 2px solid #ffffff;
             padding: 15px;
             margin-bottom: 10px;
             color: white;
+            box-sizing: border-box;
         }
 
         .post-header {
@@ -569,7 +583,7 @@
     </div>
 
     <script>
-        // グローバルなsupabaseClient��初期化
+        // グローバルなsupabaseClientの初期化
         let supabaseClient;
 
         // Supabase初期化関数を修正
@@ -668,7 +682,7 @@
             const hpPercentage = (monster.current_hp / monster.max_hp) * 100;
             document.getElementById('monsterHPBar').style.width = `${hpPercentage}%`;
 
-            // モンスター画像を表��（idle態）
+            // モンスター画像を表示（idle態）
             updateMonsterImage(monster.name, 'idle');
 
             document.getElementById('battleMessage').textContent = 
@@ -768,7 +782,7 @@
 
                 // モンスターのHPが0になった場合
                 if (monster.current_hp <= 0) {
-                    // 経験値とレベルの��算
+                    // 経験値とレベルの計算
                     const expGain = monster.level * 50;  // モンスターのレベルに応じた経験値
                     const { data: userStats } = await supabaseClient
                         .from('user_stats')
@@ -787,7 +801,7 @@
                         document.getElementById('battleMessage').textContent = 
                             `Level Up! Lv.${userStats.level} → Lv.${newLevel}`;
                         
-                        // レベルアップメッセージを表示してから3秒後に討伐メッセージを表示
+                        // レベルアップメッセージを表示してから3秒後��討伐メッセージを表示
                         setTimeout(() => {
                             document.getElementById('battleMessage').textContent = 
                                 `Defeated ${monsterJapaneseNames[monster.name]}!\nGained ${expGain} experience!`;
@@ -1055,7 +1069,7 @@
             }
         }
 
-        // モンスターリストの読み込み
+        // モンスターリ���トの読み込み
         async function loadMonsterList() {
             await checkMonstersRevival();
 
@@ -1077,11 +1091,20 @@
                 monsterCard.className = 'monster-card';
                 if (monster.current_hp <= 0) {
                     monsterCard.classList.add('defeated');
-                    // 討伐済みの場合はクリックイベントを設定しない
                 } else {
-                    // HP残っている場合のみリックイベントを設定
                     monsterCard.onclick = () => startBattle(monster.id);
                     monsterCard.style.cursor = 'pointer';
+                }
+
+                // 復活までの残り日数を計算
+                let revivalTimeText = '';
+                if (monster.current_hp <= 0 && monster.last_defeated_at) {
+                    const REVIVAL_DAYS = 7;
+                    const defeatDate = new Date(monster.last_defeated_at);
+                    const now = new Date();
+                    const daysSinceDefeat = (now - defeatDate) / (1000 * 60 * 60 * 24);
+                    const daysRemaining = Math.ceil(REVIVAL_DAYS - daysSinceDefeat);
+                    revivalTimeText = `Revives in ${daysRemaining} days`;
                 }
 
                 monsterCard.innerHTML = `
@@ -1095,7 +1118,7 @@
                             </div>
                             ${monster.current_hp <= 0 ? `
                                 <div class="defeated-badge">Defeated</div>
-                                <div class="revival-time">Revives in ${daysRemaining} days</div>
+                                <div class="revival-time">${revivalTimeText}</div>
                             ` : ''}
                         </div>
                     </div>
@@ -1198,7 +1221,7 @@
                     }
                 });
 
-                // 新しい称号があれば追加
+                // 新しい称号があれ��追加
                 if (newTitles.length > 0) {
                     const { error: insertError } = await supabaseClient
                         .from('user_titles')
@@ -1235,7 +1258,7 @@
                 }
             }
 
-            // 最高称号の場合
+            // 最高称号��場合
             if (!nextTitle) {
                 document.getElementById('expGauge').style.width = '100%';
                 document.getElementById('expText').textContent = 'Highest Title Achieved!';
