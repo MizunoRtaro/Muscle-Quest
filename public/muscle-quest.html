@@ -594,31 +594,21 @@
     </div>
 
     <script>
-        // グローバルなsupabaseClientの初期化
+        // Supabaseクライアントの初期化
         let supabaseClient;
 
-        // Supabase初期化関数を修正
         async function initializeSupabase() {
             try {
                 const response = await fetch('/api/config');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch Supabase config');
-                }
+                if (!response.ok) throw new Error('Failed to fetch config');
                 const config = await response.json();
                 
-                supabaseClient = supabase.createClient(
-                    config.supabaseUrl,
-                    config.supabaseAnonKey
-                );
+                const { createClient } = supabase;
+                supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
                 return supabaseClient;
             } catch (error) {
                 console.error('Failed to initialize Supabase:', error);
-                // 一時的な対応として、ハードコードされた値を使用
-                supabaseClient = supabase.createClient(
-                    'https://fgfonvsdxojpnvxebynd.supabase.co',
-                    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZm9udnNkeG9qcG52eGVieW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NzEyOTMsImV4cCI6MjA0OTI0NzI5M30.GaCFlB8abTzXkWAFmXkI6EwR3qIy8w9qJuLs745tzck'
-                );
-                return supabaseClient;
+                throw error;
             }
         }
 
@@ -723,7 +713,7 @@
                 }
 
                 // 効果音を再生
-                hitSound.currentTime = 0;  // 音を最初から再生
+                hitSound.currentTime = 0;  // ��を最初から再生
                 hitSound.play().catch(e => console.log('効果音の再生に失敗:', e));
 
                 const damage = mpCost * 2;  // MPの2倍のダメージ
@@ -837,7 +827,7 @@
                     // 新しい称号をチェック
                     await checkNewTitles(user.id, newExp);
 
-                    // 討伐時��を記録
+                    // 討伐時を記録
                     const { error: defeatTimeError } = await supabaseClient
                         .from('monsters')
                         .update({
@@ -939,7 +929,7 @@
 
                 if (statsError) throw statsError;
 
-                // ユーザー情���をマップ化
+                // ユーザー情をマップ化
                 const userMap = Object.fromEntries(
                     userStats.map(stat => [stat.user_id, stat.nickname])
                 );
@@ -1074,7 +1064,7 @@
                 document.getElementById('userName').textContent = userStats.nickname || 'Hero';
                 document.getElementById('userTitle').textContent = currentTitle;
                 document.getElementById('userMP').textContent = userStats.muscle_points;
-                updateExpGauge(userStats.exp, userStats.level);  // 経験値���ージを更新
+                updateExpGauge(userStats.exp, userStats.level);  // 経験値ージを更新
             } catch (error) {
                 console.error('Error in loadUserStats:', error);
             }

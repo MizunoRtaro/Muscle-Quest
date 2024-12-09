@@ -348,11 +348,23 @@
     </div>
 
     <script>
-        // Supabaseの設定を変更
-        const supabaseUrl = 'https://fgfonvsdxojpnvxebynd.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnZm9udnNkeG9qcG52eGVieW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NzEyOTMsImV4cCI6MjA0OTI0NzI5M30.GaCFlB8abTzXkWAFmXkI6EwR3qIy8w9qJuLs745tzck';
-        const { createClient } = supabase;
-        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+        // Supabaseクライアントの初期化
+        let supabaseClient;
+        
+        async function initializeSupabase() {
+            try {
+                const response = await fetch('/api/config');
+                if (!response.ok) throw new Error('Failed to fetch config');
+                const config = await response.json();
+                
+                const { createClient } = supabase;
+                supabaseClient = createClient(config.supabaseUrl, config.supabaseAnonKey);
+                return supabaseClient;
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                throw error;
+            }
+        }
 
         // グローバル変数の追加
         let currentDate = new Date();  // currentDateをグローバに定義
@@ -375,7 +387,7 @@
             }
         }
 
-        // 設定モーダルを開���
+        // 設定モーダルを開
         function openSettings() {
             document.getElementById('settingsModal').style.display = 'flex';
         }
@@ -411,9 +423,10 @@
             }
         }
 
-        // 初期関関数の修正
+        // 初期化関数の修正
         async function initializeApp() {
             try {
+                await initializeSupabase();
                 const { data: { user } } = await supabaseClient.auth.getUser();
                 if (user) {
                     document.getElementById('loginForm').classList.remove('active');
@@ -514,7 +527,7 @@
                     .single();
 
                 if (!userStats) {
-                    // 初期レコードが存在しない場合は作成
+                    // 初期レコードが���在しない場合は作成
                     const { error: insertError } = await supabaseClient
                         .from('user_stats')
                         .insert([{
