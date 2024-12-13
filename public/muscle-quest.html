@@ -638,7 +638,7 @@
             const monsterImage = document.getElementById('monsterImage');
             const img = document.createElement('img');
             
-            // モンスター名を小文字に変換して画像パス生成
+            // モンスター名を小文字に変換して��像パス生成
             const formattedName = monsterName.toLowerCase();
             img.src = `monsters/${formattedName}_${state}.png`;
             
@@ -713,8 +713,8 @@
                 }
 
                 // 効果音を再生
-                hitSound.currentTime = 0;  // ��を最初から再生
-                hitSound.play().catch(e => console.log('効果音の再生に失敗:', e));
+                hitSound.currentTime = 0;  // 効果音を最初から再生
+                hitSound.play().catch(e => console.error('Failed to play sound effect:', e));
 
                 const damage = mpCost * 2;  // MPの2倍のダメージ
 
@@ -798,7 +798,7 @@
                     // レベルアップした場合は効果音を再生
                     if (newLevel > userStats.level) {
                         levelUpSound.currentTime = 0;
-                        levelUpSound.play().catch(e => console.log('レベルアップ効果音の再生に失敗:', e));
+                        levelUpSound.play().catch(e => console.error('Failed to play level up sound:', e));
                         document.getElementById('battleMessage').textContent = 
                             `Level Up! Lv.${userStats.level} → Lv.${newLevel}`;
                         
@@ -883,7 +883,7 @@
                 await loadPosts();
             } catch (error) {
                 console.error('Error creating post:', error);
-                alert('投稿に失敗しました');
+                alert('Failed to post');
             }
         }
 
@@ -903,7 +903,7 @@
                 await loadPosts();
             } catch (error) {
                 console.error('Error deleting post:', error);
-                alert('削除に失敗しました');
+                alert('Failed to delete');
             }
         }
 
@@ -1014,7 +1014,7 @@
                 window.location.href = '/index.html';
             } catch (error) {
                 console.error('Logout error:', error);
-                alert('ログアウトに失敗しました');
+                alert('Failed to logout');
             }
         }
 
@@ -1174,7 +1174,7 @@
             loadMonsterList();  // モンスターリスト再読み込み
         }
 
-        // 復活までの残り時間を計算して表示用テキストを返す
+        // 復活ま���の残り時間を計算して表示用テキストを返す
         function getRevivalTimeText(defeatTime) {
             if (!defeatTime) return '';
             const REVIVAL_DAYS = 7;
@@ -1241,7 +1241,7 @@
             }
         }
 
-        // 次のレベルまでの経験値を計算
+        // 次の���ベルまでの経験値を計算
         function calculateNextLevelExp(level) {
             return Math.pow((level - 1) * 2, 2);
         }

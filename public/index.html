@@ -435,7 +435,7 @@
                     await loadStreakCount();
                 }
             } catch (error) {
-                console.error('初期化エラー:', error);
+                console.error('Initialization error:', error);
             }
         }
 
@@ -549,7 +549,7 @@
             } catch (error) {
                 messageEl.textContent = `Login Error: ${error.message}`;
                 messageEl.className = 'message error';
-                console.error('ログインエラー:', error);
+                console.error('Login error:', error);
             }
         }
 
@@ -581,7 +581,7 @@
                 let streak = calculateStreak(data.map(record => record.date));
                 document.getElementById('streakCount').textContent = `${streak} days`;
             } catch (error) {
-                console.error('継続日数の取得に失敗しました:', error);
+                console.error('Failed to get streak count:', error);
             }
         }
 

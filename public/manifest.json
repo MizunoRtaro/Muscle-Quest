@@ -1,7 +1,7 @@
 {
     "name": "Muscle Quest",
     "short_name": "MuscleQuest",
-    "description": "筋トレを楽しく継続！モンスターと戦って、仲間と一緒に成長しよう！",
+    "description": "Make muscle training fun! Fight monsters and grow together with friends!",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#000044",
